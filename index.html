@@ -25,13 +25,17 @@
       display: block;
       width: 100%;
       padding: 17px 20px;
+      border: 0;
       border-radius: 14px;
       background: #172033;
       color: #fff;
       text-decoration: none;
+      font: inherit;
       font-weight: 650;
       font-size: 18px;
+      cursor: pointer;
     }
+    .help { margin: 16px 0 0; color: #687587; font-size: 13px; line-height: 1.5; }
     .details { margin-top: 28px; color: #687587; font-size: 14px; line-height: 1.7; }
     .details a { color: inherit; }
   </style>
@@ -40,7 +44,8 @@
 <main>
   <h1>Jeramy Hope</h1>
   <p class="role">Executive Leader · Board Director · Systems Reform Advocate</p>
-  <a class="button" href="Jeramy_Hope.vcf">Add Jeramy to Contacts</a>
+  <a class="button" id="save-contact" href="Jeramy_Hope.vcf" download="Jeramy_Hope.vcf">Add Jeramy to Contacts</a>
+  <p class="help">Viewing this in LinkedIn? If the contact does not open, tap ••• and choose Open in Safari.</p>
   <div class="details">
     <div>0418 983 681</div>
     <div><a href="mailto:jeramyhope@gmail.com">jeramyhope@gmail.com</a></div>
@@ -48,10 +53,30 @@
   </div>
 </main>
 <script>
-  const isAppleMobile = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isAppleMobile) {
-    setTimeout(() => { window.location.href = "Jeramy_Hope.vcf"; }, 650);
-  }
+  const contactButton = document.getElementById("save-contact");
+
+  contactButton.addEventListener("click", async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await fetch("Jeramy_Hope.vcf", { cache: "no-store" });
+      if (!response.ok) throw new Error("Contact file unavailable");
+
+      const vcard = await response.text();
+      const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const download = document.createElement("a");
+
+      download.href = url;
+      download.download = "Jeramy_Hope.vcf";
+      document.body.appendChild(download);
+      download.click();
+      download.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch {
+      window.location.href = "Jeramy_Hope.vcf";
+    }
+  });
 </script>
 </body>
 </html>
