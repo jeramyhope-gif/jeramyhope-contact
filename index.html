@@ -4,53 +4,130 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Add Jeramy Hope to Contacts</title>
-  <meta name="description" content="Add Jeramy Hope to your contacts.">
+  <meta name="description" content="Save Jeramy Hope's contact details to your phone.">
   <style>
     :root { color-scheme: light; }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      min-height: 100svh;
+      padding: 28px;
+      display: grid;
+      place-items: center;
       background: #fff;
       color: #172033;
-      display: grid;
-      min-height: 100vh;
-      place-items: center;
-      padding: 28px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     main { width: min(100%, 440px); text-align: center; }
-    h1 { font-size: 34px; line-height: 1.08; margin: 0 0 10px; }
-    .role { margin: 0 0 34px; color: #526072; line-height: 1.45; }
+    .eyebrow {
+      margin: 0 0 14px;
+      color: #6b7687;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+    h1 { margin: 0 0 10px; font-size: 34px; line-height: 1.08; }
+    .role { margin: 0 0 32px; color: #526072; line-height: 1.5; }
     .button {
       display: block;
       width: 100%;
-      padding: 17px 20px;
+      min-height: 56px;
+      padding: 16px 20px;
       border: 0;
       border-radius: 14px;
       background: #172033;
       color: #fff;
-      text-decoration: none;
       font: inherit;
-      font-weight: 650;
       font-size: 18px;
+      font-weight: 700;
       cursor: pointer;
     }
-    .help { margin: 16px 0 0; color: #687587; font-size: 13px; line-height: 1.5; }
-    .details { margin-top: 28px; color: #687587; font-size: 14px; line-height: 1.7; }
+    .button:disabled { cursor: wait; opacity: .72; }
+    .status {
+      min-height: 22px;
+      margin: 14px 0 0;
+      color: #465468;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .help {
+      margin: 22px 0 0;
+      padding: 15px 17px;
+      border: 1px solid #e3e8ef;
+      border-radius: 12px;
+      background: #f7f9fb;
+      color: #526072;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: left;
+    }
+    .details { margin-top: 26px; color: #687587; font-size: 14px; line-height: 1.8; }
     .details a { color: inherit; }
+    .fallback { color: #172033; font-weight: 650; }
   </style>
 </head>
 <body>
 <main>
+  <p class="eyebrow">Digital contact card</p>
   <h1>Jeramy Hope</h1>
   <p class="role">Executive Leader · Board Director · Systems Reform Advocate</p>
-  <a class="button" href="https://jeramyhope-gif.github.io/jeramyhope-contact/Jeramy_Hope.vcf" type="text/vcard" target="_blank" rel="noopener">Add Jeramy to Contacts</a>
-  <p class="help">Tap once to open the contact card. In LinkedIn, use ••• and Open in Safari if prompted.</p>
+
+  <button class="button" id="save-contact" type="button">Save to Contacts</button>
+  <p class="status" id="status" aria-live="polite"></p>
+
+  <p class="help">
+    Opening this page inside LinkedIn? If the contact does not open, tap the three dots,
+    choose <strong>Open in Safari</strong>, then tap <strong>Save to Contacts</strong> again.
+  </p>
+
+  <noscript>
+    <p><a class="fallback" href="Jeramy_Hope.vcf" download="Jeramy_Hope.vcf">Download Jeramy's contact card</a></p>
+  </noscript>
+
   <div class="details">
     <div>0418 983 681</div>
     <div><a href="mailto:jeramyhope@gmail.com">jeramyhope@gmail.com</a></div>
     <div><a href="https://jeramyhope.com/">jeramyhope.com</a></div>
   </div>
 </main>
+
+<script>
+  const button = document.getElementById("save-contact");
+  const status = document.getElementById("status");
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    button.textContent = "Preparing contact…";
+    status.textContent = "";
+
+    try {
+      const response = await fetch("./Jeramy_Hope.vcf", { cache: "no-store" });
+      if (!response.ok) throw new Error("Contact file unavailable");
+
+      const vcard = await response.text();
+      const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "Jeramy_Hope.vcf";
+      link.type = "text/vcard";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      status.textContent = "Your contact file is ready. Open it and choose Create New Contact.";
+    } catch (error) {
+      status.textContent = "Please open this page in Safari, then try again.";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Save to Contacts";
+    }
+  });
+</script>
 </body>
 </html>
