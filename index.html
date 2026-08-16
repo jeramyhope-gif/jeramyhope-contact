@@ -79,7 +79,7 @@
 
   <p class="help">
     Opening this page inside LinkedIn? If the contact does not open, tap the three dots,
-    choose <strong>Open in Safari</strong>, then tap <strong>Save to Contacts</strong> again.
+    choose <strong>Open in Browser</strong>, then tap <strong>Save to Contacts</strong> again.
   </p>
 
   <noscript>
@@ -141,7 +141,7 @@
     } catch (error) {
       status.textContent = error.name === "AbortError"
         ? "Contact sharing was cancelled."
-        : "Please open this page in Safari, then try again.";
+        : "Please open this page in your browser, then try again.";
     } finally {
       button.disabled = false;
       button.textContent = "Save to Contacts";
