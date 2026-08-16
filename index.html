@@ -96,6 +96,8 @@
 <script>
   const button = document.getElementById("save-contact");
   const status = document.getElementById("status");
+  const isLinkedIn = /LinkedInApp|LinkedIn/i.test(navigator.userAgent)
+    || /linkedin\.com/i.test(document.referrer);
 
   button.addEventListener("click", async () => {
     button.disabled = true;
@@ -107,8 +109,23 @@
       if (!response.ok) throw new Error("Contact file unavailable");
 
       const vcard = await response.text();
-      const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
+      const file = new File([vcard], "Jeramy_Hope.vcf", { type: "text/vcard;charset=utf-8" });
+
+      if (
+        isLinkedIn
+        && navigator.share
+        && navigator.canShare
+        && navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          files: [file],
+          title: "Jeramy Hope contact"
+        });
+        status.textContent = "Open the shared contact file and choose Create New Contact.";
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
       const link = document.createElement("a");
 
       link.href = url;
@@ -122,7 +139,9 @@
       setTimeout(() => URL.revokeObjectURL(url), 30000);
       status.textContent = "Your contact file is ready. Open it and choose Create New Contact.";
     } catch (error) {
-      status.textContent = "Please open this page in Safari, then try again.";
+      status.textContent = error.name === "AbortError"
+        ? "Contact sharing was cancelled."
+        : "Please open this page in Safari, then try again.";
     } finally {
       button.disabled = false;
       button.textContent = "Save to Contacts";
